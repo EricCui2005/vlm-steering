@@ -1,0 +1,27 @@
+{
+  "photo_1": {
+    "dataset": "nlphuji/flickr_1k_test_image_text_retrieval",
+    "flickr_filename": "1007129816.jpg",
+    "description": "Man with glasses and an orange hat"
+  },
+  "photo_2": {
+    "dataset": "nlphuji/flickr_1k_test_image_text_retrieval",
+    "flickr_filename": "2504764590.jpg",
+    "description": "Person throwing a stick into water for a dog"
+  },
+  "photo_3": {
+    "dataset": "nlphuji/flickr_1k_test_image_text_retrieval",
+    "flickr_filename": "3283368342.jpg",
+    "description": "Four people with three prize-winning dogs"
+  },
+  "photo_4": {
+    "dataset": "nlphuji/flickr_1k_test_image_text_retrieval",
+    "flickr_filename": "430173345.jpg",
+    "description": "Brown dog with a purple object in a field"
+  },
+  "photo_5": {
+    "dataset": "nlphuji/flickr_1k_test_image_text_retrieval",
+    "flickr_filename": "4923272678.jpg",
+    "description": "Man in a black hat riding a bicycle"
+  }
+}

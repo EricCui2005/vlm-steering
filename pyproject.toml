@@ -1,0 +1,27 @@
+[project]
+name = "visual-symbol-steering"
+version = "0.1.0"
+description = "Does visual symbol steering replicate in an open-weight VLM?"
+requires-python = ">=3.12"
+# Local only: writing code, launching Modal jobs, and analysis.
+# The GPU packages (vLLM, transformers) are pinned in modal_app.py.
+dependencies = [
+    "matplotlib>=3.11.2",
+    "modal==1.6.3",
+    "numpy>=2.5.4",
+    "pillow>=11",
+    "pyyaml>=6",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["steering"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

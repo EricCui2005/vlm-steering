@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Secrets. The Hugging Face token lives only in the Modal secret "huggingface".
+.env
+.env.*
+*.pem
+
+# Third-party papers: link to them instead of redistributing the PDFs.
+papers/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local tooling
+.claude/
+*.log

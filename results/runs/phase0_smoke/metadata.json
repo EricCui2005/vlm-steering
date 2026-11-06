@@ -1,0 +1,29 @@
+{
+  "reconstructed_from_log": "The job crashed while writing metadata, after sampling finished. Timings come from log timestamps with 1 s resolution; versions come from the image build log.",
+  "run_name": "phase0_smoke",
+  "model_id": "google/gemma-4-E4B-it",
+  "model_revision": "4ecc2ba63bcac23ba4a767fc87025b1450f84c9c",
+  "gpu_requested": "L40S",
+  "gpu_actual": "L40S as requested (name not recorded; vLLM reported 44.42 GiB)",
+  "cpu_cores": 4,
+  "memory_gib": 32,
+  "library_versions": {
+    "vllm": "0.33.0",
+    "transformers": "5.20.0",
+    "torch": "2.14.0",
+    "modal": "1.6.3"
+  },
+  "sampling": {
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "top_k": 64,
+    "max_new_tokens": 1000
+  },
+  "base_seed": 20261104,
+  "generations_this_run": 32,
+  "output_tokens_this_run": 4610,
+  "download_seconds": 0,
+  "model_load_seconds": 196,
+  "generation_seconds": 9,
+  "total_seconds": 300
+}

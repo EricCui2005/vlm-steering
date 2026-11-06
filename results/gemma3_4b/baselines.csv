@@ -1,0 +1,7 @@
+problem,n_valid,n_other,p_recursive,ci_low,ci_high
+fib,40,0,0.675,0.520,0.799
+inorder,40,0,1.000,0.912,1.000
+preorder,40,0,1.000,0.912,1.000
+postorder,40,0,1.000,0.912,1.000
+binsearch,40,0,0.100,0.040,0.231
+dfs,40,0,0.575,0.422,0.715

@@ -1,0 +1,186 @@
+# Everything that defines the experiment lives here. Code reads this file;
+# nothing below should be hard-coded elsewhere.
+
+# Each model's sampling settings. Gemma uses the paper's settings; Qwen uses the
+# values in its own generation_config.json.
+models:
+  # 8.0B parameters. Apache 2.0, not gated, listed as supported by vLLM.
+  gemma4_e4b:
+    id: google/gemma-4-E4B-it
+    revision: 4ecc2ba63bcac23ba4a767fc87025b1450f84c9c
+    gpu: L40S
+    sampling: { temperature: 0.7, top_p: 0.95, top_k: 64, max_new_tokens: 1000 }
+  # 8.8B parameters. Apache 2.0, not gated.
+  qwen3_vl_8b:
+    id: Qwen/Qwen3-VL-8B-Instruct
+    revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
+    gpu: L40S
+    sampling: { temperature: 0.7, top_p: 0.8, top_k: 20, repetition_penalty: 1.0, max_new_tokens: 1000 }
+  # The open model in the paper's appendix. 63 GB of weights, so it runs on an
+  # H200 (141 GB) to leave room for the KV cache.
+  gemma4_31b:
+    id: google/gemma-4-31B-it
+    revision: 842da3794eaa0b77d5f08bae87a17459d91ff475
+    gpu: H200
+    sampling: { temperature: 0.7, top_p: 0.95, top_k: 64, max_new_tokens: 1000 }
+  # 4.3B parameters. Gated on Hugging Face (needs the huggingface Modal secret).
+  # Public multimodal transcoders exist for it (UIUC-MONET/vlm-circuit-tracing).
+  # Sampling follows the paper's Gemma settings.
+  gemma3_4b:
+    id: google/gemma-3-4b-it
+    revision: 093f9f388b31de276ce2de164bdc2081324b9767
+    gpu: L40S
+    sampling: { temperature: 0.7, top_p: 0.95, top_k: 64, max_new_tokens: 1000 }
+
+seed: 20261104
+
+smoke_test:
+  problems: [fib, inorder]
+  symbols: [red_heart, blue_right_arrow]
+  samples_per_condition: 8 # 2 problems x 3 conditions x 8 samples = 48 generations
+
+# Named generation runs. `all_symbols` means all 288 symbols in the library.
+runs:
+  phase1_baselines:
+    problems: [fib, inorder, preorder, postorder, binsearch, dfs]
+    conditions: [baseline]
+    samples_per_condition: 40
+  phase3_sweep_inorder:
+    problems: [inorder]
+    conditions: all_symbols
+    samples_per_condition: 20
+  # Sweeps on the two problems where Gemma 3 4B's baseline is mixed (fib 0.68,
+  # dfs 0.57 recursive), since nothing steered it on inorder.
+  phase3_sweep_fib:
+    problems: [fib]
+    conditions: all_symbols
+    samples_per_condition: 20
+  phase3_sweep_dfs:
+    problems: [dfs]
+    conditions: all_symbols
+    samples_per_condition: 20
+  # The blank image alone, as the image-prompt reference for those sweeps.
+  controls_fib:
+    problems: [fib]
+    conditions: [blank_white]
+    samples_per_condition: 40
+  controls_dfs:
+    problems: [dfs]
+    conditions: [blank_white]
+    samples_per_condition: 40
+  # The paper's text-instruction ceiling: the strategy word, repeated to the image's
+  # token length, then "Solve it using a {strategy} approach."
+  sanity_text_instruction:
+    problems: [fib, inorder]
+    conditions: [text_instruction_recursive, text_instruction_iterative]
+    samples_per_condition: 20
+  # Controls, each compared with the no-image baseline:
+  # - blank_white: the image prompt with an empty image, which isolates the prompt wording.
+  # - noise_* and photo_*: images with no symbol.
+  # - caption_*: the symbol described in text instead of shown.
+  controls_inorder:
+    problems: [inorder]
+    conditions: [
+      blank_white,
+      noise_1, noise_2, noise_3, noise_4, noise_5,
+      photo_1, photo_2, photo_3, photo_4, photo_5,
+      caption_red_heart, caption_pink_heart, caption_brown_heart,
+      caption_blue_triangle, caption_green_triangle,
+      caption_orange_u_turn_arrow, caption_brown_left_arrow, caption_purple_up_arrow,
+    ]
+    samples_per_condition: 40
+  # Qwen confirmation on fresh seeds (the run name is part of every seed).
+  # The 5 symbols that most beat the blank image at n=20, chosen before this run.
+  # Controls: the blank image, plus the strongest noise and photo images from
+  # controls_inorder, which is a deliberately hard bar.
+  confirmation_inorder:
+    problems: [inorder]
+    conditions: [
+      pink_u_turn_arrow, orange_u_turn_arrow, purple_up_arrow, brown_up_arrow, brown_left_arrow,
+      blank_white, noise_1, noise_2, photo_2, photo_5,
+    ]
+    samples_per_condition: 100
+  # Gemma 3 4B fib confirmation on fresh seeds, chosen from the n=20 fib sweep:
+  # infinity symbols raised P(iterative) in all 12 colors (the top two plus black,
+  # a middling one), branching arrows lowered it in all 12 (the two lowest).
+  # Controls: no image, blank, the same noise and photos as Qwen's confirmation,
+  # and one symbol of each shape described in text instead of shown.
+  confirmation_fib:
+    problems: [fib]
+    conditions: [
+      pink_infinity_symbol, red_infinity_symbol, black_infinity_symbol,
+      orange_branching_arrow, black_branching_arrow,
+      baseline, blank_white, noise_1, noise_2, photo_2, photo_5,
+      caption_pink_infinity_symbol, caption_orange_branching_arrow,
+    ]
+    samples_per_condition: 100
+  # Same image and image-prompt opening, but the model only names its strategy in
+  # one word instead of writing code. photo_5 steered most of the photos in
+  # confirmation_inorder.
+  choose_strategy_inorder:
+    task: choose_strategy
+    problems: [inorder]
+    conditions: [orange_u_turn_arrow, blank_white, photo_5]
+    samples_per_condition: 100
+
+# Generations per condition, used for the Phase 1-5 cost estimate.
+planned_runs:
+  baseline: { conditions: 6, samples: 40 }
+  pilot: { conditions: 87, samples: 20 } # 29 conditions on up to 3 problems
+  sweep: { conditions: 288, samples: 20 }
+  confirmation: { conditions: 24, samples: 100 }
+  perturbations: { conditions: 7, samples: 40 }
+
+# Rates from modal.com/pricing, checked 2026-11-04.
+modal_pricing_per_second:
+  gpu:
+    L40S: 0.000542
+    A100-40GB: 0.000583
+    A100-80GB: 0.000694
+    H100: 0.001097
+    H200: 0.001261
+  cpu_core: 0.0000131
+  memory_gib: 0.00000222
+
+container:
+  cpu_cores: 4
+  memory_gib: 32
+
+problems:
+  fib: >-
+    Write a function fib(n) that returns the n-th Fibonacci number.
+    Assume n is a non-negative integer.
+  inorder: >-
+    Given the root of a binary tree, return the inorder traversal of its nodes' values.
+    Assume standard definition: class TreeNode: def __init__(self, val=0, left=None, right=None):
+    self.val = val; self.left = left; self.right = right
+  preorder: >-
+    Given the root of a binary tree, return the preorder traversal of its nodes' values.
+    Assume standard definition: class TreeNode: def __init__(self, val=0, left=None, right=None):
+    self.val = val; self.left = left; self.right = right
+  postorder: >-
+    Given the root of a binary tree, return the postorder traversal of its nodes' values.
+    Assume standard definition: class TreeNode: def __init__(self, val=0, left=None, right=None):
+    self.val = val; self.left = left; self.right = right
+  binsearch: >-
+    Given a sorted (in ascending order) integer array nums and a target value, write a function
+    to search target in nums. If target exists, then return its index. Otherwise, return -1.
+  dfs: >-
+    Given a graph represented as an adjacency list graph (a dictionary mapping each node to a
+    list of its neighbors) and a starting node start, return a list of all nodes visited in
+    Depth First Search (DFS) order starting from start.
+
+# Standard CSS color values.
+colors:
+  red: [255, 0, 0]
+  orange: [255, 165, 0]
+  yellow: [255, 255, 0]
+  green: [0, 128, 0]
+  teal: [0, 128, 128]
+  cyan: [0, 255, 255]
+  blue: [0, 0, 255]
+  purple: [128, 0, 128]
+  magenta: [255, 0, 255]
+  pink: [255, 105, 180]
+  brown: [139, 69, 19]
+  black: [0, 0, 0]

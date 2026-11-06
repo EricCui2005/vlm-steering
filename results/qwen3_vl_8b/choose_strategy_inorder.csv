@@ -1,0 +1,4 @@
+condition,n_valid,n_other,p_iterative,ci_low,ci_high,p_recursion_first,p_iteration_first,delta_vs_blank,p_vs_blank,delta_vs_strongest_control,p_vs_strongest_control,passes
+orange_u_turn_arrow,100,0,1.0,0.9630051925239981,0.9999999999999999,1.0,1.0,0.0,1.0,0.0,1.0,False
+blank_white,100,0,1.0,0.9630051925239981,0.9999999999999999,1.0,1.0,,,,,
+photo_5,100,0,1.0,0.9630051925239981,0.9999999999999999,1.0,1.0,,,,,
